@@ -1,0 +1,241 @@
+"chatgpt.config": {
+  "systemPrompt": "System Instruction: Absolute Simple Coding. Eliminate ease, familiar shortcuts, magical integrations. Remove unnecessary inheritance, global states, circular dependencies, logic/IO mixing. Enforce strict separation of concerns, dependency acyclicity, immutability by default. Prefer composition over inheritance, pure functions over entangled logic, declarative over imperative. Minimal architecture: independent modules, single responsibility, reduced and explicit interfaces. Every artifact must be testable in isolation, understandable in less than three minutes. All accidental complexity is rejected. Refuse 'easy' (familiarity, proximity, immediate speed) if it introduces 'complecting'.\n\nStrict Methodology:\n1. Define abstractions according to the five W (Who, What, When, Where, Why).\n2. Split into independent modules, connect by composition.\n3. Isolate IO, persistence, frameworks behind ports/adapters.\n4. Encapsulate state, favor immutable values.\n5. Verify objective simplicity: acyclic dependency graph, single responsibilities, no intertwining.\n6. Produce unit tests on pure logic, contract tests on ports.\n7. Evaluate with anti-complecting checklist. Score <8 → refactor immediately.\n\nEnforced answer style:\n– Present ASCII architecture and list of modules.\n– Provide public signatures, invariants, contracts.\n– Provide code per module, readable and minimal.\n– Include dependency graph, completed checklist, simplicity score.\n– Add refactoring plan if necessary.\n\nNo concession to comfort, no embellishment. Sole objective: simple, non-entangled, long-term maintainable code.",
+  "simplicityChecklist": [
+    { "id": "acyclicity", "desc": "Acyclic dependencies", "weight": 2 },
+    { "id": "ioIsolation", "desc": "IO isolated from business logic", "weight": 2 },
+    { "id": "singleResponsibility", "desc": "One responsibility per module", "weight": 2 },
+    { "id": "immutability", "desc": "Majority immutability (>80%)", "weight": 2 },
+    { "id": "contracts", "desc": "Explicit contracts & invariants", "weight": 1 },
+    { "id": "readability", "desc": "Module understandable in <3 min", "weight": 1 }
+  ],
+  "simplicityTargetScore": 8,
+
+  "evaluationJsonSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SimpleCodeEvaluation",
+    "type": "object",
+    "required": ["architecture", "modules", "publicApis", "contracts", "dependencyGraph", "checklist", "score", "refactorPlan"],
+    "properties": {
+      "architecture": { "type": "string", "description": "ASCII diagram + short description" },
+      "modules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "responsibility", "dependsOn", "internalState", "io"],
+          "properties": {
+            "name": { "type": "string" },
+            "responsibility": { "type": "string" },
+            "dependsOn": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Required module names"
+            },
+            "internalState": {
+              "type": "object",
+              "required": ["mutable", "justification"],
+              "properties": {
+                "mutable": { "type": "boolean" },
+                "justification": { "type": "string" }
+              }
+            },
+            "io": {
+              "type": "object",
+              "required": ["hasIO", "ports"],
+              "properties": {
+                "hasIO": { "type": "boolean" },
+                "ports": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "type", "protocol"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "type": { "type": "string", "enum": ["input", "output"] },
+                      "protocol": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "publicApis": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["module", "signature", "description"],
+          "properties": {
+            "module": { "type": "string" },
+            "signature": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "contracts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["target", "pre", "post", "invariants"],
+          "properties": {
+            "target": { "type": "string" },
+            "pre": { "type": "string" },
+            "post": { "type": "string" },
+            "invariants": { "type": "string" }
+          }
+        }
+      },
+      "dependencyGraph": {
+        "type": "object",
+        "required": ["ascii", "isAcyclic", "cycles"],
+        "properties": {
+          "ascii": { "type": "string" },
+          "isAcyclic": { "type": "boolean" },
+          "cycles": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "checklist": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "passed", "justification"],
+          "properties": {
+            "id": { "type": "string" },
+            "passed": { "type": "boolean" },
+            "justification": { "type": "string" }
+          }
+        }
+      },
+      "score": {
+        "type": "object",
+        "required": ["total", "breakdown"],
+        "properties": {
+          "total": { "type": "number", "minimum": 0, "maximum": 10 },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "weight", "awarded", "reason"],
+              "properties": {
+                "id": { "type": "string" },
+                "weight": { "type": "number" },
+                "awarded": { "type": "number" },
+                "reason": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "refactorPlan": {
+        "type": "object",
+        "required": ["required", "actions"],
+        "properties": {
+          "required": { "type": "boolean" },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title", "impact", "steps"],
+              "properties": {
+                "title": { "type": "string" },
+                "impact": { "type": "string", "enum": ["high", "medium", "low"] },
+                "steps": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "risks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["description", "mitigation"],
+          "properties": {
+            "description": { "type": "string" },
+            "mitigation": { "type": "string" }
+          }
+        }
+      },
+      "selfCritique": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["decision", "easyAlternativeRejected", "simplerVersion"],
+          "properties": {
+            "decision": { "type": "string" },
+            "easyAlternativeRejected": { "type": "string" },
+            "simplerVersion": { "type": "string" }
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+
+  "evaluationTemplate": {
+    "architecture": "ASCII here...",
+    "modules": [
+      {
+        "name": "Domain.Core",
+        "responsibility": "Pure domain logic",
+        "dependsOn": [],
+        "internalState": { "mutable": false, "justification": "" },
+        "io": { "hasIO": false, "ports": [] }
+      }
+    ],
+    "publicApis": [
+      { "module": "Domain.Core", "signature": "calculate(input: DTO) -> Result", "description": "Pure function" }
+    ],
+    "contracts": [
+      { "target": "calculate", "pre": "input.valid == true", "post": "result.isOk == true", "invariants": "No global state" }
+    ],
+    "dependencyGraph": {
+      "ascii": "[Domain.Core] <- [Service.App] <- [Adapter.Http]",
+      "isAcyclic": true,
+      "cycles": []
+    },
+    "checklist": [
+      { "id": "acyclicity", "passed": true, "justification": "Graph without cycle" },
+      { "id": "ioIsolation", "passed": true, "justification": "IO confined to adapters" },
+      { "id": "singleResponsibility", "passed": true, "justification": "Modules with single role" },
+      { "id": "immutability", "passed": true, "justification": "Immutable structures" },
+      { "id": "contracts", "passed": true, "justification": "Explicit pre/post" },
+      { "id": "readability", "passed": true, "justification": "Reduced API surface" }
+    ],
+    "score": {
+      "total": 9,
+      "breakdown": [
+        { "id": "acyclicity", "weight": 2, "awarded": 2, "reason": "No cycles" },
+        { "id": "ioIsolation", "weight": 2, "awarded": 2, "reason": "Ports & adapters" },
+        { "id": "singleResponsibility", "weight": 2, "awarded": 2, "reason": "SRP respected" },
+        { "id": "immutability", "weight": 2, "awarded": 1, "reason": "1 encapsulated mutable cache" },
+        { "id": "contracts", "weight": 1, "awarded": 1, "reason": "Contracts present" },
+        { "id": "readability", "weight": 1, "awarded": 1, "reason": "Concise API" }
+      ]
+    },
+    "refactorPlan": {
+      "required": false,
+      "actions": []
+    },
+    "risks": [
+      { "description": "Adapter drift", "mitigation": "Strict contract tests" }
+    ],
+    "selfCritique": [
+      {
+        "decision": "In-memory cache in Service.App",
+        "easyAlternativeRejected": "Direct DB access from Domain.Core",
+        "simplerVersion": "Cache encapsulated behind Port.Cache"
+      }
+    ]
+  },
+
+  "userCommandMacros": {
+    "evaluateCurrentCode": "Evaluate the generated solution according to the JSON schema 'SimpleCodeEvaluation'. Generate ONLY a valid JSON block that satisfies 'evaluationJsonSchema'. If score.total < simplicityTargetScore, set refactorPlan.required=true with concrete actions."
+  }
+}
