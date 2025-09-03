@@ -1,0 +1,241 @@
+"chatgpt.config": {
+  "systemPrompt": "Instruction système : Codage Simple Absolu. Élimine facilité, raccourcis familiers, intégrations magiques. Supprime héritage inutile, états globaux, dépendances circulaires, mélange logique/IO. Exige séparation stricte des préoccupations, acyclicité des dépendances, immutabilité par défaut. Préfère composition à l’héritage, fonctions pures à la logique entremêlée, déclaratif à l’impératif. Architecture minimale : modules indépendants, une responsabilité unique, interfaces réduites et explicites. Tout artefact doit être évaluable en isolation, compréhensible en moins de trois minutes. Toute complexité accidentelle est rejetée. Refuse le « facile » (familiarité, proximité, rapidité immédiate) s’il introduit du « complecting ».\n\nMéthodologie stricte :\n1. Définir abstractions selon les cinq W (Who, What, When, Where, Why).\n2. Découper en modules indépendants, relier par composition.\n3. Isoler IO, persistance, frameworks derrière ports/adaptateurs.\n4. Encapsuler l’état, privilégier valeurs immuables.\n5. Vérifier la simplicité objective : graphe de dépendances acyclique, responsabilités unitaires, absence d’entrelacement.\n6. Produire tests unitaires sur logique pure, tests de contrat sur ports.\n7. Évaluer avec checklist anti-complecting. Score <8 → refactoriser immédiatement.\n\nStyle de réponse imposé :\n– Présenter architecture ASCII et liste des modules.\n– Donner signatures publiques, invariants, contrats.\n– Fournir code par module, lisible et minimal.\n– Inclure graphe des dépendances, checklist complétée, score de simplicité.\n– Ajouter plan de refactoring si nécessaire.\n\nAucune concession au confort, aucun embellissement. Objectif unique : code simple, non entremêlé, maintenable à long terme.",
+  "simplicityChecklist": [
+    { "id": "acyclicity", "desc": "Dépendances acycliques", "weight": 2 },
+    { "id": "ioIsolation", "desc": "IO isolés de la logique", "weight": 2 },
+    { "id": "singleResponsibility", "desc": "Une responsabilité par module", "weight": 2 },
+    { "id": "immutability", "desc": "Immutabilité majoritaire (>80%)", "weight": 2 },
+    { "id": "contracts", "desc": "Contrats & invariants explicites", "weight": 1 },
+    { "id": "readability", "desc": "Compréhension d’un module <3 min", "weight": 1 }
+  ],
+  "simplicityTargetScore": 8,
+
+  "evaluationJsonSchema": {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "SimpleCodeEvaluation",
+    "type": "object",
+    "required": ["architecture", "modules", "publicApis", "contracts", "dependencyGraph", "checklist", "score", "refactorPlan"],
+    "properties": {
+      "architecture": { "type": "string", "description": "Diagramme ASCII + description brève" },
+      "modules": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["name", "responsibility", "dependsOn", "internalState", "io"],
+          "properties": {
+            "name": { "type": "string" },
+            "responsibility": { "type": "string" },
+            "dependsOn": {
+              "type": "array",
+              "items": { "type": "string" },
+              "description": "Noms des modules requis"
+            },
+            "internalState": {
+              "type": "object",
+              "required": ["mutable", "justification"],
+              "properties": {
+                "mutable": { "type": "boolean" },
+                "justification": { "type": "string" }
+              }
+            },
+            "io": {
+              "type": "object",
+              "required": ["hasIO", "ports"],
+              "properties": {
+                "hasIO": { "type": "boolean" },
+                "ports": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["name", "type", "protocol"],
+                    "properties": {
+                      "name": { "type": "string" },
+                      "type": { "type": "string", "enum": ["input", "output"] },
+                      "protocol": { "type": "string" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "publicApis": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["module", "signature", "description"],
+          "properties": {
+            "module": { "type": "string" },
+            "signature": { "type": "string" },
+            "description": { "type": "string" }
+          }
+        }
+      },
+      "contracts": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["target", "pre", "post", "invariants"],
+          "properties": {
+            "target": { "type": "string" },
+            "pre": { "type": "string" },
+            "post": { "type": "string" },
+            "invariants": { "type": "string" }
+          }
+        }
+      },
+      "dependencyGraph": {
+        "type": "object",
+        "required": ["ascii", "isAcyclic", "cycles"],
+        "properties": {
+          "ascii": { "type": "string" },
+          "isAcyclic": { "type": "boolean" },
+          "cycles": {
+            "type": "array",
+            "items": { "type": "array", "items": { "type": "string" } }
+          }
+        }
+      },
+      "checklist": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["id", "passed", "justification"],
+          "properties": {
+            "id": { "type": "string" },
+            "passed": { "type": "boolean" },
+            "justification": { "type": "string" }
+          }
+        }
+      },
+      "score": {
+        "type": "object",
+        "required": ["total", "breakdown"],
+        "properties": {
+          "total": { "type": "number", "minimum": 0, "maximum": 10 },
+          "breakdown": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "weight", "awarded", "reason"],
+              "properties": {
+                "id": { "type": "string" },
+                "weight": { "type": "number" },
+                "awarded": { "type": "number" },
+                "reason": { "type": "string" }
+              }
+            }
+          }
+        }
+      },
+      "refactorPlan": {
+        "type": "object",
+        "required": ["required", "actions"],
+        "properties": {
+          "required": { "type": "boolean" },
+          "actions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["title", "impact", "steps"],
+              "properties": {
+                "title": { "type": "string" },
+                "impact": { "type": "string", "enum": ["high", "medium", "low"] },
+                "steps": {
+                  "type": "array",
+                  "items": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      },
+      "risks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["description", "mitigation"],
+          "properties": {
+            "description": { "type": "string" },
+            "mitigation": { "type": "string" }
+          }
+        }
+      },
+      "selfCritique": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "required": ["decision", "easyAlternativeRejected", "simplerVersion"],
+          "properties": {
+            "decision": { "type": "string" },
+            "easyAlternativeRejected": { "type": "string" },
+            "simplerVersion": { "type": "string" }
+          }
+        }
+      }
+    },
+    "additionalProperties": false
+  },
+
+  "evaluationTemplate": {
+    "architecture": "ASCII ici...",
+    "modules": [
+      {
+        "name": "Domain.Core",
+        "responsibility": "Logique pure du domaine",
+        "dependsOn": [],
+        "internalState": { "mutable": false, "justification": "" },
+        "io": { "hasIO": false, "ports": [] }
+      }
+    ],
+    "publicApis": [
+      { "module": "Domain.Core", "signature": "calculate(input: DTO) -> Result", "description": "Fonction pure" }
+    ],
+    "contracts": [
+      { "target": "calculate", "pre": "input.valid == true", "post": "result.isOk == true", "invariants": "Aucun état global" }
+    ],
+    "dependencyGraph": {
+      "ascii": "[Domain.Core] <- [Service.App] <- [Adapter.Http]",
+      "isAcyclic": true,
+      "cycles": []
+    },
+    "checklist": [
+      { "id": "acyclicity", "passed": true, "justification": "Graph sans cycle" },
+      { "id": "ioIsolation", "passed": true, "justification": "IO confinés aux adaptateurs" },
+      { "id": "singleResponsibility", "passed": true, "justification": "Modules à rôle unique" },
+      { "id": "immutability", "passed": true, "justification": "Structures immuables" },
+      { "id": "contracts", "passed": true, "justification": "Pré/Post explicites" },
+      { "id": "readability", "passed": true, "justification": "Surface API réduite" }
+    ],
+    "score": {
+      "total": 9,
+      "breakdown": [
+        { "id": "acyclicity", "weight": 2, "awarded": 2, "reason": "Aucun cycle" },
+        { "id": "ioIsolation", "weight": 2, "awarded": 2, "reason": "Ports & adaptateurs" },
+        { "id": "singleResponsibility", "weight": 2, "awarded": 2, "reason": "SRP respecté" },
+        { "id": "immutability", "weight": 2, "awarded": 1, "reason": "1 cache mutable encapsulé" },
+        { "id": "contracts", "weight": 1, "awarded": 1, "reason": "Contrats présents" },
+        { "id": "readability", "weight": 1, "awarded": 1, "reason": "API concise" }
+      ]
+    },
+    "refactorPlan": {
+      "required": false,
+      "actions": []
+    },
+    "risks": [
+      { "description": "Drift des adaptateurs", "mitigation": "Tests de contrat stricts" }
+    ],
+    "selfCritique": [
+      {
+        "decision": "Cache en mémoire dans Service.App",
+        "easyAlternativeRejected": "Accès DB direct depuis Domain.Core",
+        "simplerVersion": "Cache encapsulé derrière Port.Cache"
+      }
+    ]
+  },
+
+  "userCommandMacros": {
+    "evaluateCurrentCode": "Évalue la solution générée selon le schéma JSON 'SimpleCodeEvaluation'. Génère UNIQUEMENT un bloc JSON valide qui satisfait 'evaluationJsonSchema'. Si score.total < simplicityTargetScore, renseigne refactorPlan.required=true avec des actions concrètes."
+  }
+}
